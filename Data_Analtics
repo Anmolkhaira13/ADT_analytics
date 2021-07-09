@@ -1,0 +1,25 @@
+Created on Sun Jul  4 13:18:11 2021
+
+@author: anmoldeep
+"""
+import chart_studio.plotly as py
+import plotly.graph_objs as go
+import plotly
+from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
+import cufflinks as cf
+cf.set_config_file(offline=True)
+from pymongo import MongoClient
+import pandas as pd
+client = MongoClient("mongodb://127.0.0.1:27017")
+print("Connection Successful")
+db = client.movies
+collection = db.movies_ratings
+test = collection.find_one()
+print(test)
+
+# loading data in pandas 
+
+data = pd.DataFrame(list(db.movies_ratings.find()))
+pd.to_numeric(data.Profitability)
+print(data.dtypes)
+data.groupby(['Genre', 'Year'])["Profitability"].mean().unstack().plot(kind='bar', title='Average profitability of each genre in each year',width=1)
