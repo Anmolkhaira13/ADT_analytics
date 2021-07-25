@@ -1,3 +1,5 @@
+# -*- coding: utf-8 -*-
+"""
 Created on Sun Jul  4 13:18:11 2021
 
 @author: anmoldeep
@@ -5,6 +7,7 @@ Created on Sun Jul  4 13:18:11 2021
 import chart_studio.plotly as py
 import plotly.graph_objs as go
 import plotly
+import numpy as np
 from plotly.offline import download_plotlyjs, init_notebook_mode, plot, iplot
 import cufflinks as cf
 cf.set_config_file(offline=True)
@@ -13,13 +16,27 @@ import pandas as pd
 client = MongoClient("mongodb://127.0.0.1:27017")
 print("Connection Successful")
 db = client.movies
-collection = db.movies_ratings
+collection = db.movies_info
 test = collection.find_one()
 print(test)
 
 # loading data in pandas 
 
-data = pd.DataFrame(list(db.movies_ratings.find()))
-pd.to_numeric(data.Profitability)
+data = pd.DataFrame(list(db.movies_info.find()))
+
+#conversion
+
+data.Profitability = data.Profitability.astype(float)
+data = data.astype({'Rotten Tomatoes': np.int})
 print(data.dtypes)
+
+#plotting
+
+#barplot1
 data.groupby(['Genre', 'Year'])["Profitability"].mean().unstack().plot(kind='bar', title='Average profitability of each genre in each year',width=1)
+
+#barplot2
+data.groupby(['Lead Studio','Year'])["Audience score"].mean().unstack().plot(kind='bar', title='Average audience score of each studio in each year',width=1)
+
+#piechart
+data.groupby(['Year']).sum().plot(kind='pie', y='Rotten Tomatoes')
